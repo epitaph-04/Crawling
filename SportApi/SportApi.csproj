@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="resources\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -15,6 +16,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LinkFetcher\LinkFetcher.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ffmpeg\ffmpeg.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="resources\fff.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

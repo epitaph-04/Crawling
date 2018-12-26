@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -6,6 +8,7 @@ using System.Threading.Tasks;
 using LinkFetcher;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SportApi.Extensions;
 using SportApi.Scheduler;
 
 namespace SportApi
@@ -22,7 +25,28 @@ namespace SportApi
 			var liveTvLinkTask = new LiveTv().Fetch().ContinueWith(async t => await UpdateModel(ss, t.Result.ToList()));
 			var sport365LinkTask = new Sport365().Fetch().ContinueWith(async t => await UpdateModel(ss, t.Result.ToList()));
 			await Task.WhenAll(liveTvLinkTask, sport365LinkTask);
+			await GenerateImages();
 			LiveLink.Current = new LiveLink { Link = linkModels };
+		}
+
+		private async Task GenerateImages()
+		{
+			var executableLocation = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+			var imagePath = Path.Combine(executableLocation, "resources");
+			var ffmpegPath = Path.Combine(executableLocation, "ffmpeg/ffmpeg.exe");
+
+			DirectoryInfo di = new DirectoryInfo(imagePath);
+			foreach (FileInfo file in di.GetFiles())
+			{
+				file.Delete();
+			}
+			foreach (var linkmodel in linkModels.GroupBy(x => x.LinkInfo.Title))
+			{
+				var output = Path.Combine(imagePath, $"{linkmodel.Key}.jpg");
+				var path = linkmodel.First()?.Links.FirstOrDefault();
+				var arguments = $"-ss 00:00:01 -i \"{path}\" -frames 1 \"{output}\"";
+				await ProcessExtensions.RunProcessAsync(ffmpegPath, arguments);
+			}
 		}
 
 		private async Task UpdateModel(SemaphoreSlim ss, List<LinkModel> items)
