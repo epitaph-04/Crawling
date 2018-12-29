@@ -1,1 +1,1 @@
-# Crawling    [![Build Status](https://travis-ci.org/epitaph-04/Crawling.svg?branch=master)](https://travis-ci.org/epitaph-04/Crawling)
+# Crawling    [![Travic](https://travis-ci.org/epitaph-04/Crawling.svg?branch=master)](https://travis-ci.org/epitaph-04/Crawling)		[![appveyor](https://ci.appveyor.com/api/projects/status/lrt33m4tl8sfyyx2/branch/master?svg=true)](https://ci.appveyor.com/project/epitaph-04/crawling/branch/master)
