@@ -24,9 +24,12 @@ build_script:
 
     dotnet pack --no-build --output nupkgs
 
-    dotnet publish
+    dotnet publish SportApi/SportApi.csproj --framework netcoreapp2.2 -r win-x64 --self-contained -o publishFolder
 test_script:
 - sh: dotnet test
 artifacts:
-- path: nupkgs/*
+artifacts:
+- path: nupkgs/*.nupkg
   name: Packages
+- path: publishFolder
+  name: Publish
