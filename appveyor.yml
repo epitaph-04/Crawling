@@ -2,6 +2,14 @@ version: 1.0.{build}
 image: Ubuntu1804
 configuration: Release
 platform: Any CPU
-build:
-  publish_wap: true
-  verbosity: minimal
+build_script:
+- sh: >-
+    dotnet restore
+
+    dotnet build
+
+    dotnet test
+
+    dotnet pack
+
+    dotnet publish
