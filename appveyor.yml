@@ -28,7 +28,7 @@ build_script:
 test_script:
 - sh: dotnet test
 artifacts:
-- path: **/*.nupkg
+- path: '**/*.nupkg'
   name: Packages
 - path: SportApi/publishFolder
   name: PublishArtifacts
