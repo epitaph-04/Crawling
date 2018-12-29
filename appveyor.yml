@@ -28,8 +28,7 @@ build_script:
 test_script:
 - sh: dotnet test
 artifacts:
-artifacts:
 - path: nupkgs/*.nupkg
   name: Packages
 - path: publishFolder
-  name: Publish
+  name: PublishArtifacts
