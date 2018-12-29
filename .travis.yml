@@ -3,6 +3,6 @@ dist: trusty
 mono: none
 dotnet: 2.1.300
 before_script:
-  - chmod a+x ./travis-build.sh
+  - chmod a+x ./build.sh
 script:
-  - ./travis-build.sh
+  - ./build.sh
