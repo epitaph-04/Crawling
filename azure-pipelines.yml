@@ -5,5 +5,7 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- script: chmod a+x ./build.sh
+- script: chmod a+x ./publish.sh
 - bash: ./build.sh
 - bash: ./publish.sh
