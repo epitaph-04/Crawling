@@ -1,0 +1,27 @@
+version: '3.8'
+
+networks:
+  web:
+
+services:
+  chrome:
+    image: selenium/standalone-chrome:latest
+    hostname: chrome
+    ports:
+    - "4444:4444"
+    expose:
+    - "4444"
+    networks:
+    - web
+    privileged: true
+    shm_size: 2g
+  app:
+    build: .
+    ports:
+    - "80:80"
+    expose:
+    - "80"
+    networks:
+    - web
+    depends_on: 
+    - chrome

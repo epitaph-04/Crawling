@@ -65,7 +65,7 @@ namespace LinkFetcher
 			var playerLink = new HashSet<string>();
 			var title = string.Empty;
 			var time = string.Empty;
-			var playerLinkUrl = "cdn.livetvcdn.net/webplayer.php";
+			var playerLinkUrl = "/webplayer";
 			using (var response = await client.GetAsync(rootUrl + link))
 			{
 				using (var content = response.Content)

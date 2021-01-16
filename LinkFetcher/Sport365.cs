@@ -1,41 +1,35 @@
 ﻿using HtmlAgilityPack;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using LinkFetcher.Extensions;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using System.IO;
+using OpenQA.Selenium.Remote;
+
 using System;
-using OpenQA.Selenium.Support.UI;
 
 namespace LinkFetcher
 {
 	public class Sport365 : ILiveTvLink
 	{
-		private string assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
 		private string rootUrl = "http://www.sport365.live/en/home";
-		private readonly HttpClient client;
-		private ChromeDriver driver;
+		private RemoteWebDriver driver;
+		private string webDriverBaseUrl;
 
-		public Sport365()
+		public Sport365(string baseUrl)
 		{
-			HttpClientHandler handler = new HttpClientHandler()
-			{
-				AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-			};
-			client = new HttpClient(handler);
-
-			
+			webDriverBaseUrl = baseUrl;
 		}
 
 		public async Task<IEnumerable<LinkModel>> Fetch()
 		{
-			ChromeOptions option = new ChromeOptions();
-			option.AddArgument("--headless");
-			driver = new ChromeDriver(assemblyPath, option);
+			var chromeOptions = new ChromeOptions();
+			chromeOptions.AddArgument("--lang=en");
+			chromeOptions.AddArgument("--headless");
+			chromeOptions.AddArgument("--window-size=1920,1080");
+
+			driver = new RemoteWebDriver(new Uri($"{webDriverBaseUrl}/wd/hub"), chromeOptions);
 
 			var matchLinks = new List<LinkModel>();
 			try
@@ -64,9 +58,9 @@ namespace LinkFetcher
 		{
 			var Links = new Dictionary<LinkInfo, HashSet<string>>();
 			driver.Navigate().GoToUrl(rootUrl);
-			driver.FindElement(OpenQA.Selenium.By.XPath("//img[@alt='Watch now']")).Click();
+			driver.FindElement(By.XPath("//img[@alt='Watch now']")).Click();
 			await Task.Delay(1000);
-			var links = driver.FindElements(OpenQA.Selenium.By.XPath("//div[@id='content-right']//div[@id='content_div']//div[@class='post']//div[@id='events']//table//tbody/tr[@title='Live']"));
+			var links = driver.FindElements(By.XPath("//div[@id='content-right']//div[@id='content_div']//div[@class='post']//div[@id='events']//table//tbody/tr[@title='Live']"));
 
 			var oddEvenLinks = links.Select((item, index) => new { Item = item, Index = index })
 					 .GroupBy(x => x.Index % 2 == 0)
@@ -84,7 +78,7 @@ namespace LinkFetcher
 
 						element.Click();
 						await Task.Delay(500);
-						var codeLinks = driver.FindElements(OpenQA.Selenium.By.XPath("//div[@id='link_list']//table//tbody//tr//td[@class='row1']//span[@id='span_code_links']"));
+						var codeLinks = driver.FindElements(By.XPath("//div[@id='link_list']//table//tbody//tr//td[@class='row1']//span[@id='span_code_links']"));
 						foreach (var code in codeLinks)
 						{
 							if (code.Displayed)
@@ -92,11 +86,11 @@ namespace LinkFetcher
 								code.Click();
 								await Task.Delay(500);
 
-								var popupArea = driver.FindElements(OpenQA.Selenium.By.XPath("//textarea[@id='popup-code-control']")).FirstOrDefault();
+								var popupArea = driver.FindElements(By.XPath("//textarea[@id='popup-code-control']")).FirstOrDefault();
 								if (popupArea != null)
 								{
 									httpLinks.Add(ParseUrl(popupArea.Text, "/", new[] { "1024", "724" }.ToList()));
-									driver.FindElement(OpenQA.Selenium.By.XPath("//div[@id='popup-box']//table/tbody/tr/td/img")).Click();
+									driver.FindElement(By.XPath("//div[@id='popup-box']//table/tbody/tr/td/img")).Click();
 									await Task.Delay(1000);
 								}
 
@@ -114,14 +108,11 @@ namespace LinkFetcher
 
 		private async Task<string> FetchM3U8Link(string liveLink)
 		{
-			var m3u8Link = new HashSet<string>();
-
 			driver.Navigate().GoToUrl(liveLink);
 			await Task.Delay(1000);
-			var iframe = driver.FindElement(OpenQA.Selenium.By.XPath("//div[@id='area-middle']//iframe"));
-
-			driver.SwitchTo().Frame(driver.FindElement(OpenQA.Selenium.By.XPath("//div[@id='area-middle']//iframe")));
-			driver.SwitchTo().Frame(driver.FindElement(OpenQA.Selenium.By.XPath("//iframe")));
+			
+			driver.SwitchTo().Frame(driver.FindElement(By.XPath("//div[@id='area-middle']//iframe")));
+			driver.SwitchTo().Frame(driver.FindElement(By.XPath("//iframe")));
 
 			var document = new HtmlDocument();
 			document.LoadHtml(driver.PageSource);
@@ -150,16 +141,16 @@ namespace LinkFetcher
 			regex = new Regex(live);
 			var titleInfos = regex.Split(text);
 
-			regex = new Regex(hq);
-			var languageInfos = regex.Split(titleInfos[2].Trim());
+			//regex = new Regex(hq);
+			//var languageInfos = regex.Split(titleInfos[2].Trim());
 
 			regex = new Regex(dashReplace);
 			return new LinkInfo
 			{
 				Title = regex.Replace(titleInfos[0], " vs ").Trim(),
 				Time = time.Trim(),
-				Language = languageInfos.Count() > 1 ? languageInfos[1] : languageInfos[0],
-				Quality = languageInfos.Count() > 1 ?(VideoQuality) Enum.Parse(typeof(VideoQuality), languageInfos[0]) : VideoQuality.MQ
+				//Language = languageInfos.Count() > 1 ? languageInfos[1] : languageInfos[0],
+				//Quality = languageInfos.Count() > 1 ?(VideoQuality) Enum.Parse(typeof(VideoQuality), languageInfos[0]) : VideoQuality.MQ
 			};
 		}
 	}
