@@ -18,21 +18,24 @@ type LinkDetails struct {
 	Language string
 }
 
+// Link match link
+type Link struct {
+	URLLink  string
+	M3U8Link string
+}
+
 // LinkModel holds all live link data
 type LinkModel struct {
 	LinkDetails
-	Links []string
+	Links []Link
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	URL := "http://livetv.sx/enx/livescore/"
 
-	c := colly.NewCollector(
-		colly.CacheDir("./cache"),
-	)
+	c := colly.NewCollector()
 
 	linkCollector := colly.NewCollector(
-		colly.CacheDir("./cache"),
 		colly.Async(true),
 	)
 
@@ -41,6 +44,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	p := utils.NewConcurrentSlice()
+	m3u8mapper := utils.NewConcurrentMap()
 
 	// count links
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
@@ -55,14 +59,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			ll := utils.NewConcurrentSlice()
 			e.ForEach("a[href]", func(_ int, el *colly.HTMLElement) {
 				link := el.Request.AbsoluteURL(el.Attr("href"))
-				if strings.Contains(link, "cdn.livetv375.me/webplayer") {
-					ll.Append(link)
+				if strings.Contains(link, "/webplayer") {
+					matchlink := new(Link)
+					matchlink.URLLink = link
+					ll.Append(matchlink)
+					e.Request.Ctx.Put("url", link)
 					e.Request.Visit(link)
 				}
 			})
-			items := make([]string, 0)
+			items := make([]Link, 0)
 			for v := range ll.Iter() {
-				items = append(items, v.(string))
+				items = append(items, *v.(*Link))
 			}
 			if len(items) > 0 {
 				linkinfo := new(LinkModel)
@@ -80,13 +87,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	linkCollector.OnHTML("video", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Text, ".m3u8") {
-			log.Println(ParseM3u8(e.Text))
+			m3u8mapper.Set(e.Request.Ctx.Get("url"), parseM3u8(e.Text))
 		}
 	})
 
 	linkCollector.OnHTML("script", func(e *colly.HTMLElement) {
 		if strings.Contains(e.Text, ".m3u8") {
-			log.Println(ParseM3u8(e.Text))
+			m3u8mapper.Set(e.Request.Ctx.Get("url"), parseM3u8(e.Text))
 		}
 	})
 
@@ -95,7 +102,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	matchInfos := make([]LinkModel, 0)
 	for content := range p.Iter() {
-		matchInfos = append(matchInfos, *content.(*LinkModel))
+		linkmodel := *content.(*LinkModel)
+		for i := 0; i < len(linkmodel.Links); i++ {
+			link := &linkmodel.Links[i]
+			if m3u8, found := m3u8mapper.Get(link.URLLink); found {
+				link.M3U8Link = m3u8.(string)
+			}
+		}
+		matchInfos = append(matchInfos, linkmodel)
 	}
 
 	// dump results
@@ -108,7 +122,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func ParseM3u8(content string) string {
+func parseM3u8(content string) string {
 	re := regexp.MustCompile(`(http(s)?://)([\w-]+\.)+[\w-]+(/[\w- ;,./?%&=]*)?`)
 	return re.FindString(content)
 }
