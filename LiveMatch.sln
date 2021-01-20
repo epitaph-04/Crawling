@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkFetcher", "LinkFetcher\LinkFetcher.csproj", "{2BC3F939-92EB-41C3-8959-83CE8C0CE63C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveTvWorker", "LiveTvWorker\LiveTvWorker.csproj", "{5C21A162-9395-4BFE-8900-BE441803E29A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sport365Worker", "Sport365Worker\Sport365Worker.csproj", "{525A2319-CC0A-4717-8A14-DF38E9A36BEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{2BC3F939-92EB-41C3-8959-83CE8C0CE63C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BC3F939-92EB-41C3-8959-83CE8C0CE63C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BC3F939-92EB-41C3-8959-83CE8C0CE63C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C21A162-9395-4BFE-8900-BE441803E29A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C21A162-9395-4BFE-8900-BE441803E29A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C21A162-9395-4BFE-8900-BE441803E29A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C21A162-9395-4BFE-8900-BE441803E29A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

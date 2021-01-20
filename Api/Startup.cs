@@ -26,7 +26,7 @@ namespace Api
 					.AddCronJob<LinkFetcherJob>(c =>
 					{
 						c.TimeZoneInfo = TimeZoneInfo.Local;
-						c.CronExpression = @"*/2 * * * *";
+						c.CronExpression = @"*/5 * * * *";
 					})
 					.AddSwaggerGen(c =>
 					{
