@@ -1,0 +1,14 @@
+{{- if .Values.budget.minAvailable -}}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "livetv.fullname" . }}
+  labels:
+    {{- include "livetv.labels" . | nindent 4 }}
+    {{- toYaml .Values.metadata.labels | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "livetv.selectorLabels" . | nindent 6 }}
+  minAvailable: {{ .Values.budget.minAvailable }}
+{{- end -}}

@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Api.CronJob
+namespace HostedService.CronJobScheduler
 {
 	public abstract class CronJobService : IHostedService, IDisposable
     {

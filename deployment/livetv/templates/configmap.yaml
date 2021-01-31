@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "livetv.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "livetv.name" . }}
+    helm.sh/chart: {{ include "livetv.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  {{- if .Values.deployment.eventSource }}
+  eventsource.Production.json: |-
+{{ toJson .Values.deployment.eventSource | indent 4 }}
+  {{- end }}
+

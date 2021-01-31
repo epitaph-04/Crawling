@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace Api.CronJob
+namespace HostedService.CronJobScheduler
 {
     public static class ScheduledServiceExtensions
     {

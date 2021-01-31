@@ -1,0 +1,143 @@
+clusterDomain: cluster.local
+
+clustering:
+  forceBoot: true
+
+replicaCount: 1
+
+image:
+  debug: false
+
+auth:
+  username: rabbitmq-user
+  password: rabbitmq-user
+  erlangCookie: fm7CstJaac74VMUWsQvtgQ6aVq83xHqF
+
+extraPlugins: rabbitmq_consistent_hash_exchange
+
+extraSecrets:
+  rabbitmq-passwords-{{ .Values.namespace }}:
+    monitoring: pMGRLPaP7bCY4MXtEyMQ3xAey6ZcHANw
+    api: cUCpwSpgKCfWkXPGsy877ZAJ9EYGN9Cn
+    livetv: jM7kqM6NgM3QzAUFLG8JL8s8YW9Drd5p
+    sport365: k7S35ZvAnDa5RpVJrabe8fmcgDUAhKrJ
+  rabbitmq-definition-{{ .Values.namespace }}:
+    load_definition.json: |
+      {
+        "users": [
+          {
+            "name": "rabbitmq-user",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "password_hash": "p+actsMDpc8lx2XAK7AeUi23+6hfRiLJ9u+bAa7558FUauWV",
+            "tags": ""
+          }, {
+            "name": "rabbitmq-monitoring",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "password_hash": "Dg2UfAGsTYyLOILS0KKFcMevk8SW0NtHTX2lMTfM5vCXsDVb",
+            "tags": "monitoring"
+          }, {
+            "name": "livetv",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "password_hash": "ytp8NcvTPXkO//ui1Ke1gUbT6sbik66YnoVbQ59kM8niz7SF",
+            "tags": "management"
+          }, {
+            "name": "api",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "password_hash": "bzL2iGhh3fWiAVIbIB5Ux1rlkPMZKa6lsPD6dOSNRt7CY1n5",
+            "tags": "management"
+          }, {
+            "name": "sport365",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "password_hash": "zk6bucAsNbVu/LRP5s/6Wz/zoGU+/bZoDV+Azw8LBuQH1x1n",
+            "tags": "management"
+          }
+        ],
+        "vhosts": [
+          {
+            "limits": [],
+            "metadata": {
+              "description": "undefined",
+              "tags": []
+            },
+            "name": "/"
+          }, {
+            "limits": [],
+            "metadata": {
+              "description": "undefined",
+              "tags": []
+            },
+            "name": "/link"
+          }
+        ],
+        "permissions": [
+          {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "rabbitmq-user",
+            "vhost": "/"
+          }, {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "rabbitmq-user",
+            "vhost": "/link"
+          }, {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "rabbitmq-monitoring",
+            "vhost": "/"
+          }, {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "rabbitmq-monitoring",
+            "vhost": "/link"
+          }, {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "api",
+            "vhost": "/link"
+          }, {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "livetv",
+            "vhost": "/link"
+          }, {
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*",
+            "user": "sport365",
+            "vhost": "/link"
+          }
+        ]
+      }
+
+loadDefinition:
+  enabled: true
+  existingSecret: rabbitmq-definition-{{ .Values.namespace }}
+
+extraConfiguration: |-
+  load_definitions = /app/load_definition.json
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 250m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+memoryHighWatermark:
+  enabled: true
+  value: 0.7
+
+livenessProbe:
+  initialDelaySeconds: 150
+  failureThreshold: 10
+readinessProbe:
+  initialDelaySeconds: 30
+  failureThreshold: 10

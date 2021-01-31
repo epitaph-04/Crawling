@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sport365.fullname" . }}
+  labels:
+    {{- include "sport365.labels" . | nindent 4 }}
+    {{- toYaml .Values.metadata.labels | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "sport365.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sport365.selectorLabels" . | nindent 8 }}
+        {{- toYaml .Values.metadata.labels | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.metadata.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "sport365.serviceAccountName" . }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}{{ if ne (trunc 1 .Values.image.tag) "@" }}:{{end}}{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+          - containerPort: {{ .Values.service.port }}
+          volumeMounts:
+            - name: eventsource-volume
+              mountPath: /app/eventsource.Production.json
+              subPath: eventsource.Production.json
+          {{- with .Values.env.container }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: eventsource-volume
+          configMap:
+            name: {{ include "sport365.fullname" . }}
+            items:
+            - key: eventsource.Production.json 
+              path: eventsource.Production.json        
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | trim | indent 8 }}
+      {{- end }}

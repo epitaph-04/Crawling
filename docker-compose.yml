@@ -4,19 +4,27 @@ networks:
   web:
 
 services:
-  chrome:
-    image: selenium/standalone-chrome:latest
-    hostname: chrome
+  #chrome:
+  #  image: selenium/standalone-chrome:latest
+  #  hostname: chrome
+  #  ports:
+  #  - "4444:4444"
+  #  expose:
+  #  - "4444"
+  #  networks:
+  #  - web
+  #  privileged: true
+  #  shm_size: 2g
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
     ports:
-    - "4444:4444"
-    expose:
-    - "4444"
-    networks:
-    - web
-    privileged: true
-    shm_size: 2g
-  app:
-    build: .
+    - 5672:5672
+    - 15672:15672
+  api:
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
     ports:
     - "80:80"
     expose:
@@ -24,4 +32,16 @@ services:
     networks:
     - web
     depends_on: 
-    - chrome
+    - rabbitmq
+  livetv-worker:
+    build:
+      context: .
+      dockerfile: LiveTvWorker/Dockerfile
+    ports:
+    - "5001:5002"
+    expose:
+    - "5002"
+    networks:
+    - web
+    depends_on:
+    - rabbitmq

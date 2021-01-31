@@ -1,0 +1,180 @@
+apiVersion: {{ if  ge .Capabilities.KubeVersion.Minor "16" }} apps/v1 {{ else }} extensions/v1beta1 {{ end }}
+kind: Deployment
+metadata:
+  name: {{ include "api.fullname" . }}
+  labels:
+    {{- include "api.labels" . | nindent 4 }}
+    {{- toYaml .Values.metadata.labels | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "api.selectorLabels" . | nindent 8 }}
+        {{- toYaml .Values.metadata.labels | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.metadata.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "api.serviceAccountName" . }}
+      {{- end }}
+      initContainers:
+        - name: data-fetch
+          image: 732003476425.dkr.ecr.eu-west-1.amazonaws.com/amazon/aws-cli:2.1.1
+          imagePullPolicy: "Always"
+          env:
+            {{- with .Values.env.initcontainer }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            - name: BUCKET_NAME
+              value: {{ required "Init data S3 bucket must be defined!" .Values.deployment.initData.s3.bucket | quote }}
+            - name: CONFIG
+              value: {{ required "config must be defined!" .Values.deployment.initData.s3.config }}
+            - name: CONFIG_VERSION
+              value: {{ required "config version must be defined!" .Values.deployment.initData.s3.configVersion }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              rm -rf /app/plannerData/*
+              ls /app/plannerData/
+              configPath="s3://${BUCKET_NAME}/${CONFIG}/${CONFIG_VERSION}"
+              aws s3api head-object --bucket ${BUCKET_NAME} --key ${CONFIG}/${CONFIG_VERSION}/plannerDataSettings.json
+              aws s3 cp --recursive $configPath /app/plannerData/
+          volumeMounts:
+            - name: plannerdata-s3
+              mountPath: /app/plannerData
+
+        {{- if .Values.secrets.vault.enable }}
+        - name: secret-fetch
+          image: {{ .Values.secrets.vault.image }}
+          volumeMounts:
+          - name: secret-volume
+            mountPath: /secret
+          env:
+          - name: ASSUME_AWS_ROLE_ARN
+            value: {{ .Values.secrets.vault.awsrolearn }}
+          - name: VAULT_ROLE
+            value: {{ .Values.secrets.vault.role }}
+          - name: VAULT_SECRET_NAMESPACE
+            value: {{ .Values.secrets.vault.namespace }}
+          - name: VAULT_SAVE_DIR
+            value: /secret
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 32Mi
+          command: ["/bin/bash", "-c"]
+          args:
+          - |
+            set -e
+            rm -rf $VAULT_SAVE_DIR/*
+            
+            path=({{- range $value := .Values.secrets.vault.secrets }}{{ $value | quote }} {{ end }})
+            ./scripts/vault-iam.sh ${path[@]}
+
+            for filePath in ${path[@]}; do
+              fileName=$(basename $VAULT_SAVE_DIR/$filePath)
+              jq -r .data $VAULT_SAVE_DIR/$filePath > $VAULT_SAVE_DIR/$fileName.dec
+              base64 -d $VAULT_SAVE_DIR/$fileName.dec > $VAULT_SAVE_DIR/$fileName
+              rm $VAULT_SAVE_DIR/$fileName.dec
+              rm $VAULT_SAVE_DIR/$filePath
+            done
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}{{ if ne (trunc 1 .Values.image.tag) "@" }}:{{end}}{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+          - containerPort: {{ .Values.service.port }}
+          volumeMounts:
+            - name: plannerdata-s3
+              mountPath: /app/plannerData
+            - name: plannerdata-volume
+              mountPath: /app/plannerData/plannerRuntimeSettings.json
+              subPath: plannerRuntimeSettings.json
+            {{- if .Values.deployment.encryptionMapping }}
+            - name: encryptiondata-volume
+              mountPath: /app/encryptionMapping.json
+              subPath: encryptionMapping.json
+            {{- end }}
+            {{- if .Values.secrets.enable }}
+            - name: secret-volume
+              mountPath: /app/ExportKeys
+            {{- end }}
+            {{- if .Values.deployment.eventSource }}
+            - name: eventsource-volume
+              mountPath: /app/eventsource.Production.json
+              subPath: eventsource.Production.json
+            {{- end }}
+          {{- with .Values.env.container }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: plannerdata-volume
+          configMap:
+            name: {{ include "api.fullname" . }}
+            items:
+              - key: plannerRuntimeSettings.json
+                path: plannerRuntimeSettings.json
+        {{- if .Values.deployment.encryptionMapping }}
+        - name: encryptiondata-volume
+          configMap:
+            name: {{ include "api.fullname" . }}
+            items:
+            - key: encryptionMapping.json 
+              path: encryptionMapping.json        
+        {{- end }}
+        {{- if .Values.secrets.enable }}
+        - name: secret-volume
+          {{- if .Values.secrets.vault.enable }}
+          hostPath:
+            path: /data/{{ .Release.Name }}/secret
+            type: DirectoryOrCreate
+          {{- else }}
+          secret:
+            secretName: {{ include "api.fullname" . }}
+            items:
+            {{- range $key, $value := .Values.secrets.pipeline }}
+            - key: {{$key}}
+              path: {{$key}}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.deployment.eventSource }}
+        - name: eventsource-volume
+          configMap:
+            name: {{ include "api.fullname" . }}
+            items:
+            - key: eventsource.Production.json 
+              path: eventsource.Production.json        
+        {{- end }}
+        - name: plannerdata-s3
+          hostPath:
+            path: /data/{{ .Release.Name }}/plannerdata
+            type: DirectoryOrCreate
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | trim | indent 8 }}
+      {{- end }}

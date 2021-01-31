@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sport365.fullname" . }}
+  labels:
+    {{- include "sport365.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "sport365.selectorLabels" . | nindent 4 }}

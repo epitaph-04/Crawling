@@ -1,0 +1,13 @@
+{
+	"eventSubscription": {
+		"rabbitmqSettings": {
+			"host": "localhost",
+			"virtualHost": "/",
+			"username": "guest",
+			"password": "guest",
+			"messageExchange": {
+				"LinkModel": "events.livetv-worker.match-link.e"
+			}
+		}
+	}
+}

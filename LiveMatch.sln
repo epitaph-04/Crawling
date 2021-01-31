@@ -3,13 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{9EE7717F-5F2E-4065-A257-310374216B03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "Api\Api.csproj", "{9EE7717F-5F2E-4065-A257-310374216B03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkFetcher", "LinkFetcher\LinkFetcher.csproj", "{2BC3F939-92EB-41C3-8959-83CE8C0CE63C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinkFetcher", "LinkFetcher\LinkFetcher.csproj", "{2BC3F939-92EB-41C3-8959-83CE8C0CE63C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveTvWorker", "LiveTvWorker\LiveTvWorker.csproj", "{5C21A162-9395-4BFE-8900-BE441803E29A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveTvWorker", "LiveTvWorker\LiveTvWorker.csproj", "{5C21A162-9395-4BFE-8900-BE441803E29A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sport365Worker", "Sport365Worker\Sport365Worker.csproj", "{525A2319-CC0A-4717-8A14-DF38E9A36BEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sport365Worker", "Sport365Worker\Sport365Worker.csproj", "{525A2319-CC0A-4717-8A14-DF38E9A36BEA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build tools", "build tools", "{5C499664-FE3F-4B89-B3D4-8808A73CE165}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HostedService", "HostedService\HostedService.csproj", "{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deployment", "deployment", "{E376D61F-7828-47D6-993E-5A0CBB87CF49}"
+	ProjectSection(SolutionItems) = preProject
+		deployment\helmfile.yaml = deployment\helmfile.yaml
+		deployment\nmi-engine.yaml.gotmpl = deployment\nmi-engine.yaml.gotmpl
+		deployment\rabbitmq.yaml.gotmpl = deployment\rabbitmq.yaml.gotmpl
+		deployment\redis.yaml.gotmpl = deployment\redis.yaml.gotmpl
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +49,10 @@ Global
 		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{525A2319-CC0A-4717-8A14-DF38E9A36BEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

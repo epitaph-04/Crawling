@@ -1,0 +1,61 @@
+replicaCount: 1
+
+image:
+  repository: livematchbackend_api
+  tag: latest
+  pullPolicy: Always
+
+nameOverride: 
+fullnameOverride: 
+
+metadata:
+  labels: {}
+  annotations: {}
+
+podAnnotations: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetMemoryUtilizationPercentage: "70" 
+  targetCPUUtilizationPercentage: "80"
+  customs: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: api
+
+env:
+  container: {}
+
+deployment:
+  eventSource: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations: {}
+  hosts:
+    - host: api.livematch.internal
+      paths: 
+      - /
+  tls: false
+
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+budget: {}
