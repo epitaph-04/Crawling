@@ -1,6 +1,6 @@
 ﻿  using MediatR;
 
-namespace Api.Infrastructure
+namespace Infrastructure
 {
 	public interface IQuery<out TResponse> : IRequest<TResponse> { }
 }

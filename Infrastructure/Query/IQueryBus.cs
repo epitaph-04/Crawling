@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Api.Infrastructure
+namespace Infrastructure
 {
     public interface IQueryBus
     {

@@ -1,4 +1,5 @@
-﻿using Api.Infrastructure;
+﻿using Api.Query;
+using Infrastructure;
 using LinkFetcher;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace Api.Controllers
 {
 	[Route("[controller]")]
 	[ApiController]
-	public class MatchInfoController : ControllerBase
+    public class MatchInfoController : ControllerBase
 	{
 		private readonly IQueryBus _queryBus;
 
@@ -24,7 +25,7 @@ namespace Api.Controllers
 			var query = new GetLinkQuery();
 			var result = await _queryBus.Send(query, CancellationToken.None);
 
-			return Ok(result);
+			return result;
 		}
 	}
 }

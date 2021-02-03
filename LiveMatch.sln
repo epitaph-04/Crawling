@@ -22,10 +22,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deployment", "deployment", "{E376D61F-7828-47D6-993E-5A0CBB87CF49}"
 	ProjectSection(SolutionItems) = preProject
 		deployment\helmfile.yaml = deployment\helmfile.yaml
-		deployment\nmi-engine.yaml.gotmpl = deployment\nmi-engine.yaml.gotmpl
 		deployment\rabbitmq.yaml.gotmpl = deployment\rabbitmq.yaml.gotmpl
 		deployment\redis.yaml.gotmpl = deployment\redis.yaml.gotmpl
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{6AB20B21-FFBF-4F7C-ADF7-D82736E1AD9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +54,10 @@ Global
 		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8ADC54DC-197B-40CD-A07A-83BAD5CF4ED7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AB20B21-FFBF-4F7C-ADF7-D82736E1AD9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AB20B21-FFBF-4F7C-ADF7-D82736E1AD9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AB20B21-FFBF-4F7C-ADF7-D82736E1AD9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AB20B21-FFBF-4F7C-ADF7-D82736E1AD9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

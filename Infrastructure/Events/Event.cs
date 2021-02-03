@@ -1,6 +1,6 @@
 ﻿  using System;
 
-namespace Api.Infrastructure.Events
+namespace Infrastructure.Events
 {
     public abstract class Event : IEvent
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Api.Infrastructure.Events
+namespace Infrastructure.Events
 {
     public interface IEventBus
     {

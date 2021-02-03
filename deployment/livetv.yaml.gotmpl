@@ -8,7 +8,7 @@ resources:
     memory: 64Mi
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 1
   maxReplicas: 2
   targetMemoryUtilizationPercentage: 80
@@ -26,8 +26,8 @@ deployment:
       enable: true
       rabbitmqSettings:
         host: rabbitmq-ha-{{ .Values.namespace }}-headless
-        virtualHost: /nmi-messaging
+        virtualHost: /link
         username: livetv
-        password: 
+        password: jM7kqM6NgM3QzAUFLG8JL8s8YW9Drd5p
         messageExchange:
-          SparkApiSettings: events.media-spark.lifecycle.e
+          matchLink: events.livematch.linkfetch.e

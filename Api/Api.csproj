@@ -21,6 +21,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LinkFetcher\LinkFetcher.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Query\" />
+  </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@
 			"username": "guest",
 			"password": "guest",
 			"messageExchange": {
-				"LinkModel": "events.livetv-worker.match-link.e"
+				"LinkModel": "events.livematch.match-link.e"
 			}
 		}
 	}

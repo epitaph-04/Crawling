@@ -24,7 +24,9 @@ services:
     - 15672:15672
 
   api:
-    image: api
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
     ports:
     - 80:80
     expose:
@@ -33,18 +35,16 @@ services:
     - web
     depends_on:
     - rabbitmq
-    environment:
-    - eventSubscription__rabbitmqSettings__host=rabbitmq
 
   livetv-worker:
-    image: livetv
+    build:
+      context: .
+      dockerfile: LiveTvWorker/Dockerfile
     ports:
     - 5000:5000
     expose:
-    - 5000
+    - 5002
     networks:
     - web
     depends_on:
     - rabbitmq
-    environment:
-    - eventSubscription__rabbitmqSettings__host=rabbitmq
