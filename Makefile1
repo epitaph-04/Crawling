@@ -1,0 +1,87 @@
+.DEFAULT_GOAL := help
+include .env
+export
+.EXPORT_ALL_VARIABLES: 
+
+nugetfeedupdate :=
+	ifeq ($(OS), Windows_NT)
+		nugetfeedupdate := cd .\project\planbuilding && .\nuget-feed-add.bat
+	else
+		nugetfeedupdate := cd ./project/planbuilding ; ./nuget-feed-add.sh
+	endif
+
+install_dev_dependency :=
+	ifeq ($(OS), Windows_NT)
+		install_dev_dependency := choco install k3d --version=4.0.0 -y && choco install kubernetes-cli --version=1.20.2 -y && choco install kubernetes-helmfile --version=0.138.2
+	else
+		install_dev_dependency := wget -q -O - https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=v4.0.0 bash
+	endif
+
+##@ Manage
+clone: ## clonnig all repo
+	git clone git@gitlab.com:nielsen-media/me/planning/nmi/planning-platform/planbuilding.git project/planbuilding
+	git clone git@gitlab.com:nielsen-media/me/planning/nmi/planning-platform/plananalyzing3.git project/plananalyzing
+
+install-dependency: ## install dependency
+	$(install_dev_dependency)
+
+uninstall-dependency: ## uninstall dependency
+	choco uninstall k3d
+
+create-cluster: ## create cluster `planning-platform` inside docker
+	k3d registry create planning-registry.localhost --port 9999
+	k3d cluster create planning-platform --registry-use k3d-planning-registry.localhost:9999 --api-port 6550 -p "80:80@loadbalancer"
+
+delete-cluster: ## delete cluster `planning-platform` from docker
+	k3d cluster delete planning-platform
+	k3d registry delete k3d-planning-registry.localhost
+
+add-nuget-feed:	
+	$(nugetfeedupdate) | true
+
+build-planbuild-only: add-nuget-feed ## build `planbuild` without test
+	dotnet build project/planbuilding
+
+build-plananalyze-only: add-nuget-feed ## build `plananalyze` without test
+	dotnet build project/plananalyzing
+
+build-only-all: build-planbuild-only build-plananalyze-only ## build all projects without test
+
+build-planbuild: build-planbuild-only ## build `planbuild`
+	dotnet test project/planbuilding
+
+build-plananalyze: build-plananalyze-only ## build `plananalyze`
+	dotnet test project/plananalyzing
+
+build: build-planbuild build-plananalyze ## build all projects
+
+run-planbuild: build-planbuild-only ## run `plananalyze` locally
+	dotnet run --project project/planbuilding/PlanBuilding.Webservice --urls=http://+:5000/
+
+run-plananalyze: build-plananalyze-only ## run `plananalyze` locally
+	dotnet run --project project/plananalyzing/PlanAnalyzing.Webservice --urls=http://+:5001/
+
+deploy: docker-push ## deploy all application inside k3s cluster
+	kubectl config use-context k3d-planning-platform
+	helmfile -f local-deploy/helmfile.yaml apply
+
+deploy-clean: ## cleanup k3s deployment
+	helmfile -f local-deploy/helmfile.yaml destroy
+
+docker-build: ## build all application inside docker
+	docker-compose -f docker-compose.yml -f docker-compose.Build.yml build
+
+docker-push: ## push already build application image to local registry
+	docker-compose -f docker-compose.yml -f docker-compose.Build.yml push
+
+docker-deploy: ## deploy via docker-compose
+	docker-compose -f docker-compose.yml -f docker-compose.Build.yml up --build
+
+docker-deploy-clean: ## cleanup deployment from docker
+	docker-compose -f docker-compose.yml -f docker-compose.Build.yml down
+
+fresh-deploy: clone install-dependency create-cluster docker-build deploy ## run this if you want haven't run any make command and want to deploy at one go 
+
+.PHONY: help
+help:
+	@echo $(MAKEFILE_LIST)
