@@ -1,4 +1,6 @@
+.vscode/*
 .vs/*
 */bin/*
 */obj/*
 *.lock
+.DS_Store
